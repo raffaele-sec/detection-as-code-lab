@@ -2,3 +2,8 @@ __pycache__/
 *.log
 .env
 venv/
+bin/
+include/
+lib/
+lib64/
+pyvenv.cfg
