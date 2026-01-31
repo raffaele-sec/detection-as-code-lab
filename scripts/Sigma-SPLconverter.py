@@ -60,17 +60,36 @@ def deploy_rule(name, query, description):
     
     #il dizionario contenente i campi per la creazione dell'alert vengono passati a "data"
     #se la creazione va a buon fine viene restituito lo status code 201
-    #se la rule è già esistente, viene generato lo status code 409
+    #se la rule è già esistente, viene generato lo status code 409a
     post_api = requests.post(url=splunk_url, headers=headers, verify=False, data=payload)
     
 
     if post_api.status_code == 201:
         print("La regola è stata creata con successo!")
+
+    #Se restituisce status code 409 vuol dire che la rule c'è già, quindi fa l'update.
     elif post_api.status_code == 409:
-        print("La regola esiste già!")
-
-
-
+        print("La regola è già presente. Verrà effettuato l'update!")
+        splunk_url_update=f"{splunk_url}/{name}"
+        
+        #per l'update della regola devo eliminare il campo "name", sennò da errore 409
+        payload = {
+        "search" : query,
+        "description" : description,
+        "is_scheduled" : "1",
+        "cron_schedule" : "*/5 * * * *",
+        "alert_type": "number of events",
+        "alert_comparator": "greater than",
+        "alert_threshold": "0",
+        "alert.track": "1",
+        "alert.severity": "4"
+        }
+        post_update_api = requests.post(url=splunk_url_update, headers=headers, verify=False, data=payload)
+        if post_update_api.status_code == 200:
+            print("Update della regola effettuato con successo.")
+        else:
+            print("Errore nell'update della regola.")
+            sys.exit(1)
 
 rules_path="./rules/"
 
@@ -91,4 +110,5 @@ for rule in collection_rules.rules:
     converted_rule = backend.convert_rule(rule)
 
     #invio i campi estratti regola per regola verso splunk tramite la funziona creata
-    deploy_rule(rule_name, converted_rule, rule_description)
+    #perchè "converted_rule[0]"? perchè l afunzione backend.convert_rule potrebbe restituire più query da un'unica regola SIGMA, quindi ne teniamo 1.
+    deploy_rule(rule_name, converted_rule[0], rule_description)
