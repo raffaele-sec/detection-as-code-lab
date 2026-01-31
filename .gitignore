@@ -1,10 +1,11 @@
 __pycache__/
-*.log
+*.pyc
 .env
+# Questo blocca automaticamente bin, lib, include, pyvenv.cfg al suo interno
 venv/
-bin/
-include/
-lib/
-lib64
-pyvenv.cfg
+env/
+*.log
+.vscode/
+.idea/
+.DS_Store
 pypr/
