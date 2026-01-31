@@ -1,10 +1,94 @@
 import os
 import sys
+import urllib3
+import requests
+from sigma.collection import SigmaCollection
+from sigma.backends.splunk import SplunkBackend
+from sigma.pipelines.splunk import splunk_windows_pipeline
 
+#per disabilitare warning SSL, perchè la porta 8089 usata per la gestione delle API di splunk 
+#abilita di default HTTPS.
+urllib3.disable_warnings()
+
+
+
+#prendo i valori dell'url e del token dalle variabili d'ambiente del sistema (nel caso di git, dai secrets)
+#ricordarsi di impostare l'url come https e non http per le API!
 SPLUNK_HOST = os.environ.get("SPLUNK_HOST")
 SPLUNK_TOKEN = os.environ.get("SPLUNK_TOKEN")
 
-if not SPLUNK_HOST or SPLUNK_TOKEN:
-    print("URL Splunk o Token di autenticazione non trovati")
+if not SPLUNK_HOST:
+    print("URL di Splunk non trovato")
+    #permette a git di terminare il programma con un'errore
+    sys.exit(1)
+elif not SPLUNK_TOKEN:
+    print("Token di autenticazione Splunk non trovato")
     sys.exit(1)
 
+
+
+
+#Gli argument della funziona verranno presi dalle regole convertite
+def deploy_rule(name, query, description):
+
+    #creo l'url aggiungendo il path dell'API delle ricerche salvate per gli alert di Splunk
+    #rispetto al path trovato nella doc di splunk, bisogna aggiungere "servicesNS/nobody/search" per far si
+    #che la rule diventi visibile a tutti e non solo all'utente di default
+    splunk_url=f"{SPLUNK_HOST}/servicesNS/nobody/search/saved/searches"
+
+    #creazione degli header per passare il token, gli esempi sono della documentazione di Splunk
+    #sezione "Use authentication tokens"
+    headers = {
+        "Authorization" : f"Bearer {SPLUNK_TOKEN}"
+    }
+
+    #preparo il payload, ossia i campi che popoleranno la creazione dell'alert su Splunk.
+    payload = {
+        # --- PARAMETRI PER CREARE UN REPORT
+        "name" : name,
+        "search" : query,
+        "description" : description,
+        "is_scheduled" : "1",
+        "cron_schedule" : "*/5 * * * *",
+        # --- PARAMETRI PER TRASFORMARLO IN ALLARME
+        "alert_type": "number of events",
+        "alert_comparator": "greater than",
+        "alert_threshold": "0",
+        "alert.track": "1",
+        "alert.severity": "4"
+        }
+    
+    #il dizionario contenente i campi per la creazione dell'alert vengono passati a "data"
+    #se la creazione va a buon fine viene restituito lo status code 201
+    #se la rule è già esistente, viene generato lo status code 409
+    post_api = requests.post(url=splunk_url, headers=headers, verify=False, data=payload)
+    
+
+    if post_api.status_code == 201:
+        print("La regola è stata creata con successo!")
+    elif post_api.status_code == 409:
+        print("La regola esiste già!")
+
+
+
+
+rules_path="./rules/"
+
+#importo le regole Sigma dal path "rules" massivamente. SigmaColleciton permette la lettura dei file YAML
+collection_rules=SigmaCollection.load_ruleset([rules_path])
+
+#si imposta il backend per la conversione
+backend = SplunkBackend(processing_pipeline=splunk_windows_pipeline())
+
+#la proprietà "rules" della SigmaCollection permette di accedere ai singoli campi della rule Sigma
+#Questo serve per estrarre i campi da passare al payload della POST verso l'API di Splunk per creare l'alert
+#questo ciclo for itera nella lista delle regole
+for rule in collection_rules.rules:
+    rule_name=rule.title
+    rule_description=rule.description
+
+    #converto la singola regola nell'iterazione. backend.convert() accetta la collection, mentre convert_rule() accetta una singola regola.
+    converted_rule = backend.convert_rule(rule)
+
+    #invio i campi estratti regola per regola verso splunk tramite la funziona creata
+    deploy_rule(rule_name, converted_rule, rule_description)
