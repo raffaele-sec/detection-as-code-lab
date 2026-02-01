@@ -29,7 +29,7 @@ elif not SPLUNK_TOKEN:
 
 
 
-#Gli argument della funzione verranno presi dalle regole convertite
+#Gli argument della funzione verranno presi dalle regole Sigma dopo la collection
 def deploy_rule(name, query, description):
 
     #creo l'url aggiungendo il path dell'API delle ricerche salvate per gli alert di Splunk
@@ -62,37 +62,45 @@ def deploy_rule(name, query, description):
     #il dizionario contenente i campi per la creazione dell'alert vengono passati a "data"
     #se la creazione va a buon fine viene restituito lo status code 201
     #se la rule è già esistente, viene generato lo status code 409
-    post_api = requests.post(url=splunk_url, headers=headers, verify=False, data=payload)
-    
-
-    if post_api.status_code == 201:
-        print("La regola è stata creata con successo!")
-
-    #Se restituisce status code 409 vuol dire che la rule c'è già, quindi fa l'update.
-    elif post_api.status_code == 409:
-        print("La regola è già presente. Verrà effettuato l'update!")
+    try:
+        post_api = requests.post(url=splunk_url, headers=headers, verify=False, data=payload, timeout=10)
         
-        #devo quindi "contattare" l'url con il nome della regola alla fine
-        splunk_url_update=f"{splunk_url}/{name}"
-        
-        #per l'update della regola devo eliminare il campo "name", sennò da errore 409
-        payload = {
-        "search" : query,
-        "description" : description,
-        "is_scheduled" : "1",
-        "cron_schedule" : "*/5 * * * *",
-        "alert_type": "number of events",
-        "alert_comparator": "greater than",
-        "alert_threshold": "0",
-        "alert.track": "1",
-        "alert.severity": "4"
-        }
-        post_update_api = requests.post(url=splunk_url_update, headers=headers, verify=False, data=payload)
-        if post_update_api.status_code == 200:
-            print("Update della regola effettuato con successo.")
+
+        if post_api.status_code == 201:
+            print(f"La regola {name} è stata creata con successo!")
+
+        #Se restituisce status code 409 vuol dire che la rule c'è già, quindi fa l'update.
+        elif post_api.status_code == 409:
+            print(f"La regola {name} è già presente. Verrà effettuato l'update!")
+            
+            #devo quindi "contattare" l'url con il nome della regola alla fine
+            splunk_url_update=f"{splunk_url}/{name}"
+            
+            #per l'update della regola devo eliminare il campo "name", sennò da errore 409
+            payload = {
+            "search" : query,
+            "description" : description,
+            "is_scheduled" : "1",
+            "cron_schedule" : "*/5 * * * *",
+            "alert_type": "number of events",
+            "alert_comparator": "greater than",
+            "alert_threshold": "0",
+            "alert.track": "1",
+            "alert.severity": "4"
+            }
+            post_update_api = requests.post(url=splunk_url_update, headers=headers, verify=False, data=payload, timeout=10)
+            if post_update_api.status_code == 200:
+                print(f"Update della regola {name} effettuato con successo.")
+            else:
+                print(f"Errore nell'update della regola {name}.")
+                #rimosso il sys.exit(1) perchè lo script deve continuare convertire/inviare le altre rules, se presenti
+
+        #else nel caso in cui lo status code della prima POST "post_api" non sia ne 201 ne 409.
         else:
-            print("Errore nell'update della regola.")
-            sys.exit(1)
+            print(f"Errore nell'update della regola {name} con errore {post_api.status_code}")
+    except requests.RequestException as err: #RequestException cattura tutti i tipi di errori, come timeout e connectionerror
+        print(err)
+        
         
 
 
@@ -107,7 +115,7 @@ try:
     backend = SplunkBackend(processing_pipeline=splunk_windows_pipeline())
 except SigmaCollectionError: #gestione errori di collection importata da sigma.exceptions
     print("Errore di lettura delle regole da SigmaCollection")
-
+    sys.exit(1)
 
 #la proprietà "rules" di SigmaCollection permette di accedere alle singole regole nella collection e ai singoli campi della rule Sigma
 #Questo serve per estrarre i campi da passare al payload della POST verso l'API di Splunk per creare l'alert
@@ -119,9 +127,12 @@ for rule in collection_rules.rules:
     #converto la singola regola nell'iterazione. backend.convert() accetta la collection, mentre convert_rule() accetta una singola regola.
     try:
         converted_rule = backend.convert_rule(rule)
-
         #invio i campi estratti regola per regola verso splunk tramite la funziona creata
         #perchè "converted_rule[0]"? perchè l afunzione backend.convert_rule potrebbe restituire più query da un'unica regola SIGMA, quindi ne teniamo 1.
         deploy_rule(rule_name, converted_rule[0], rule_description)
+
     except SigmaConversionError: #gestione errori di conversione importata da sigma.exceptions
-        continue
+        print(f"Errore di conversione della regola {rule_name}")
+        continue #continua a iterare e a convertire le altre regole, dopo aver notificato quale regola "non va bene"
+        
+    
