@@ -1,0 +1,23 @@
+name: Deploy Splunk Rules
+on:
+  push:
+    paths:
+      - 'rules/**' #gli "**" per indicare indicare la ricorsività
+
+jobs:
+  splunk_deploy: #nome del job
+    runs-on: self-hosted #per fare comunicare github con il server splunk locale
+    
+    steps:
+      - uses: actions/checkout@v6 #@v6 indica la versione, controllata su https://github.com/marketplace/actions/checkout
+      - uses: actions/setup-python@v6
+        with:
+            python-version: "3.14"
+      - run: pip install pysigma pysigma-backend-splunk
+      - run: python scripts/Sigma-SPLconverter.py
+        env: #lo script in python carica le variabili di sistema per url e token di splunk, quindi li carico dai secrets
+            SPLUNK_HOST: ${{ secrets.SPLUNK_HOST }}
+            SPLUNK_TOKEN: ${{ secrets.SPLUNK_TOKEN }}
+            
+
+    
