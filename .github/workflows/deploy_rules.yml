@@ -2,7 +2,7 @@ name: Deploy Splunk Rules
 on:
   push:
     paths:
-      - 'rules/**/**/' #gli "**" per indicare indicare la ricorsività
+      - 'rules/**/**' #gli "**" per indicare indicare la ricorsività
 
 
 jobs:
