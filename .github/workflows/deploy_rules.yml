@@ -12,14 +12,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6 #@v6 indica la versione, controllata su https://github.com/marketplace/actions/checkout
-      #serve per caricare i contenuti nel runner
-      - uses: SigmaHQ/sigma-rules-validator@v1 #serve per validare le regole sigma che pusho nel repo.
-        with:
-          paths: 'rules/**/**'
-
-          #restituisce l'exit code 0 se la validazione va con successo e non-zero se fallisce
-
-
+      #serve per caricare i contenuti del mio repo nel runner (quindi le rules e scripts) nel runner
+      - run: pip install check-jsonschema
+      - run: |
+          curl -o sigma-schema.json https://raw.githubusercontent.com/SigmaHQ/sigma-specification/main/sigma-schema.json
+          check-jsonschema --schemafile sigma-schema.json rules/**/*.yml
+      #serve per validare le Sigma rules con sigma-schema.json presente su SigmaHQ
 
   splunk_deploy: #nome del job
     needs: sigma_validate #per non fare eseguire il job in parallelo, indico che deve prima terminare con successo il primo
