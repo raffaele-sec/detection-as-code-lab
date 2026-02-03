@@ -16,7 +16,7 @@ jobs:
       - run: pip install check-jsonschema
       - run: |
           curl -o sigma-schema.json https://raw.githubusercontent.com/SigmaHQ/sigma-specification/main/sigma-schema.json
-          check-jsonschema --schemafile sigma-schema.json rules/**/*.yml
+          check-jsonschema --schemafile sigma-schema.json rules/**/**/
       #serve per validare le Sigma rules con sigma-schema.json presente su SigmaHQ
 
   splunk_deploy: #nome del job
