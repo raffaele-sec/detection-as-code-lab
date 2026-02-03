@@ -17,6 +17,7 @@ jobs:
         with:
           paths: 'rules/**/**'
           schemaURL: 'https://raw.githubusercontent.com/SigmaHQ/sigma-specification/main/sigma-schema.json'
+          schemaFile: './sigma-schema.json' #perchè il workflow dava "Error: Option '--schemafile' requires an argument."
           #fornendo l'URL scarica sempre la versione aggiornata del Sigma Schema
 
           #restituisce l'exit code 0 se la validazione va con successo e non-zero se fallisce
