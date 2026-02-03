@@ -6,7 +6,26 @@ on:
 
 
 jobs:
+
+  sigma_validate: #nome del job
+    runs-on: self-hosted #per fare comunicare github con il server splunk locale
+
+    steps:
+      - uses: actions/checkout@v6 #@v6 indica la versione, controllata su https://github.com/marketplace/actions/checkout
+      #serve per caricare i contenuti nel runner
+      - uses: SigmaHQ/sigma-rules-validator@v1 #serve per validare le regole sigma che pusho nel repo
+        with:
+          paths: 'rules/**/**'
+          schemaURL: 'https://raw.githubusercontent.com/SigmaHQ/sigma-specification/main/sigma-schema.json'
+          #fornendo l'URL scarica sempre la versione aggiornata del Sigma Schema
+
+          #restituisce l'exit code 0 se la validazione va con successo e non-zero se fallisce
+
+
+
   splunk_deploy: #nome del job
+    needs: sigma_validate #per non fare eseguire il job in parallelo, indico che deve prima terminare con successo il primo
+    #ossia la validazione della regola deve terminare con successo:
     runs-on: self-hosted #per fare comunicare github con il server splunk locale
     container: python:3.13-slim
     
