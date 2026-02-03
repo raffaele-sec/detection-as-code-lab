@@ -15,7 +15,7 @@ jobs:
       #serve per caricare i contenuti del mio repo nel runner (quindi le rules e scripts) nel runner
       - run: pip install check-jsonschema
       - run: |
-          curl -o sigma-schema.json https://raw.githubusercontent.com/SigmaHQ/sigma-specification/main/sigma-schema.json
+          curl -o sigma-schema.json https://github.com/SigmaHQ/sigma/blob/master/tests/validate-sigma-schema/sigma-schema.json
           check-jsonschema --schemafile sigma-schema.json rules/**/**/*.yml
       #serve per validare le Sigma rules con sigma-schema.json presente su SigmaHQ
 
