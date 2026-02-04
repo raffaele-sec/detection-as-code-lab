@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6 #@v6 indica la versione, controllata su https://github.com/marketplace/actions/checkout
 
-      - run: pip install pysigma pysigma-backend-splunk
+      - run: pip install pysigma pysigma-backend-splunk pysigma-pipeline-sysmon
       
       - run: python scripts/Sigma-SPLconverter.py
         env: #lo script in python carica le variabili di sistema per url e token di splunk, quindi li carico dai secrets
