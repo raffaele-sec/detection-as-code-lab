@@ -28,22 +28,26 @@ rules_content_list=[]
 
 try:
     files_deleted=subprocess.check_output("git diff --name-only --diff-filter=D HEAD^ HEAD", shell=True, text=True).strip()
-    #lancia il comando "git diff" per vedere i file eliminati, confrontando il commit attuale con quello precedente
-    rules_deleted= files_deleted.split('\n')
-    #crea una lista di file eliminati da poter iterare tramite "split" + newline
+    if files_deleted:
 
-    #controlliamo riga per riga i file eliminati
-    for path_rule in rules_deleted:
-        if ".yml" in path_rule: #se il file eliminato è una sigma rule, quindi c'è l'estensione yaml
+        #lancia il comando "git diff" per vedere i file eliminati, confrontando il commit attuale con quello precedente
+        rules_deleted= files_deleted.split('\n')
+        #crea una lista di file eliminati da poter iterare tramite "split" + newline
 
-            deleted_rules_content=subprocess.check_output(f"git show HEAD^:{path_rule}", shell=True, text=True).strip()
-            #si lancia il comando git show per mostrare il contenuto della sigma rule eliminata
+        #controlliamo riga per riga i file eliminati
+        for path_rule in rules_deleted:
+            if ".yml" in path_rule: #se il file eliminato è una sigma rule, quindi c'è l'estensione yaml
 
-            yaml_converted_content=yaml.safe_load(deleted_rules_content)
-            #si converte in yaml il contenuto e poi lo si aggiunge alla lista, per prepararla alla lettura da parte di SigmaCollection
-            #diventando così una lista di dizionari
-            rules_content_list.append(yaml_converted_content)
-        
+                deleted_rules_content=subprocess.check_output(f"git show HEAD^:{path_rule}", shell=True, text=True).strip()
+                #si lancia il comando git show per mostrare il contenuto della sigma rule eliminata
+
+                yaml_converted_content=yaml.safe_load(deleted_rules_content)
+                #si converte in yaml il contenuto e poi lo si aggiunge alla lista, per prepararla alla lettura da parte di SigmaCollection
+                #diventando così una lista di dizionari
+                rules_content_list.append(yaml_converted_content)
+    else:
+        print("Nessuna sigma rule eliminata. Non bisogna eliminare nulla su splunk")
+        sys.exit(0)
 
 except subprocess.CalledProcessError as e:
     print(f"Errore {e}")
