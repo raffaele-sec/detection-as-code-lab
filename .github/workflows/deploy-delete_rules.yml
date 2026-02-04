@@ -30,10 +30,13 @@ jobs:
         with:
           fetch-depth: 0 #scarica la storia dei commit per permettere il check fatto da SavedSearchDeleter.py
 
-      - run: apt update -y && apt install git -y #serve git per lo script "SavedSearchDeleter.py"
-
-      # errore "error: Could not access 'HEAD^'" dello script SavedSearchDeleter.py
-      - run: git config --global --add safe.directory '*'
+      - run: |
+              apt update -y && apt install git -y #serve git per lo script "SavedSearchDeleter.py"
+              git config --global --add safe.directory '*'
+      #errore "error: Could not access 'HEAD^'" dello script SavedSearchDeleter.py
+      
+      #debugging
+      - run: git log --oneline -n 5
       
       - run: pip install pysigma pysigma-backend-splunk pysigma-pipeline-sysmon
 
