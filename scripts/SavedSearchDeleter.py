@@ -66,9 +66,9 @@ try:
         try:
             req_api=requests.delete(url=splunk_url, headers=headers, verify=False, timeout=10)
             if req_api.status_code == 200:
-                print("La regola è stata eliminata con successo")
+                print(f"La regola {rules.title} è stata eliminata con successo")
             elif req_api.status_code == 404:
-                print("La regola non è presente o è già stata eliminata")
+                print(f"La regola {rules.title} non è presente o è già stata eliminata")
             else:
                 print(f"Errore {req_api.status_code}: {req_api.text}")
                 sys.exit(1)

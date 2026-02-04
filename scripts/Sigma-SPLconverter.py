@@ -80,36 +80,41 @@ def deploy_rule(name, query, description):
             #voglio controllare, prima di effettuare l'update, che le query non siano uguali
             #per avere l'output in formato JSON, per poter accedere al valore della query più facilmente (come un dictionary), metto a fine url il
             #parametro "?output_mode=json"
-            get_api=requests.get(url=f"{splunk_url_update}?output_mode=json", headers=headers, verify=False)
-            json_api=get_api.json()
-
-            #perchè il [0]? perchè la parte del json dopo entry (check su cyberchef) è una lista, perchè c'è una "["
-            #quindi tutto il contenuto "content" e "search" del json è nel primo elemento della lista "entry"
-            splunk_query=json_api["entry"][0]["content"]["search"]
-
-            if query == splunk_query:
-                print("Update della regola non necessario.")
-            else:
-
             
-                #per l'update della regola devo eliminare il campo "name", sennò da errore 409
-                payload = {
-                "search" : query,
-                "description" : description,
-                "is_scheduled" : "1",
-                "cron_schedule" : "*/5 * * * *",
-                "alert_type": "number of events",
-                "alert_comparator": "greater than",
-                "alert_threshold": "0",
-                "alert.track": "1",
-                "alert.severity": "4"
-                }
-                post_update_api = requests.post(url=splunk_url_update, headers=headers, verify=False, data=payload, timeout=10)
-                if post_update_api.status_code == 200:
-                    print(f"Update della regola {name} effettuato con successo.")
+
+            get_api=requests.get(url=f"{splunk_url_update}?output_mode=json", headers=headers, verify=False)
+            if get_api.status_code == 200:
+                json_api=get_api.json()
+
+                #perchè il [0]? perchè la parte del json dopo entry (check su cyberchef) è una lista, perchè c'è una "["
+                #quindi tutto il contenuto "content" e "search" del json è nel primo elemento della lista "entry"
+                splunk_query=json_api["entry"][0]["content"]["search"]
+
+                if query == splunk_query:
+                    print("Update della regola non necessario.")
                 else:
-                    print(f"Errore nell'update della regola {name}.")
-                    #rimosso il sys.exit(1) perchè lo script deve continuare convertire/inviare le altre rules, se presenti
+
+                
+                    #per l'update della regola devo eliminare il campo "name", sennò da errore 409
+                    payload = {
+                    "search" : query,
+                    "description" : description,
+                    "is_scheduled" : "1",
+                    "cron_schedule" : "*/5 * * * *",
+                    "alert_type": "number of events",
+                    "alert_comparator": "greater than",
+                    "alert_threshold": "0",
+                    "alert.track": "1",
+                    "alert.severity": "4"
+                    }
+                    post_update_api = requests.post(url=splunk_url_update, headers=headers, verify=False, data=payload, timeout=10)
+                    if post_update_api.status_code == 200:
+                        print(f"Update della regola {name} effettuato con successo.")
+                    else:
+                        print(f"Errore nell'update della regola {name}.")
+                        #rimosso il sys.exit(1) perchè lo script deve continuare convertire/inviare le altre rules, se presenti
+            else:
+                print(f"Impossibile leggere la regola {get_api.status_code} : {get_api.text}")
 
         #else nel caso in cui lo status code della prima POST "post_api" non sia ne 201 ne 409.
         else:
