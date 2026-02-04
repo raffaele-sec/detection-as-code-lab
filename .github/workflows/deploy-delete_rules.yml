@@ -33,7 +33,7 @@ jobs:
           
       - run: pip install pysigma pysigma-backend-splunk pysigma-pipeline-sysmon
 
-      #fa il check ed elimina regole se verifica che è stata eliminata una regola
+      #fa il check tra il commit passato e il presente; Elimina le regole su Splunk se verifica che è stata eliminata una regola nel repo
       - run: python scripts/SavedSearchDeleter.py
         env: #lo script in python carica le variabili di sistema per url e token di splunk, quindi li carico dai secrets
             SPLUNK_HOST: ${{ secrets.SPLUNK_HOST }}
