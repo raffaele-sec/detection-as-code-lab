@@ -5,6 +5,7 @@ import requests
 from sigma.collection import SigmaCollection
 from sigma.backends.splunk import SplunkBackend
 from sigma.pipelines.splunk import splunk_windows_pipeline
+from sigma.pipelines.sysmon import sysmon_pipeline #per mappare gli EventID di sysmon nella query SPL https://github.com/SigmaHQ/pySigma-pipeline-sysmon
 from sigma.exceptions import SigmaCollectionError, SigmaConversionError
 
 #per disabilitare warning SSL, perchè la porta 8089 usata per la gestione delle API di splunk 
@@ -126,8 +127,15 @@ rules_path="./rules/"
 try:
     collection_rules=SigmaCollection.load_ruleset([rules_path])
 
+    custom_pipeline=sysmon_pipeline() + splunk_windows_pipeline()
+    #serve per creare una pipeline che unisce "splunk_windows_pipeline" per convertire correttamente in SPL
+    #alla "sysmon_pipeline" per mappare gli EventID in SPL. La "sysmon_pipeline" ha una priorità più bassa, quindi avviene prima
+    #il processing della "sysmon_pipeline"
+
+
+
     #si imposta il backend per la conversione
-    backend = SplunkBackend(processing_pipeline=splunk_windows_pipeline())
+    backend = SplunkBackend(processing_pipeline=custom_pipeline)
 except SigmaCollectionError: #gestione errori di collection importata da sigma.exceptions
     print("Errore di lettura delle regole da SigmaCollection")
     sys.exit(1)
