@@ -31,6 +31,10 @@ jobs:
           fetch-depth: 0 #scarica la storia dei commit per permettere il check fatto da SavedSearchDeleter.py
 
       - run: apt update -y && apt install git -y #serve git per lo script "SavedSearchDeleter.py"
+
+      # errore "error: Could not access 'HEAD^'" dello script SavedSearchDeleter.py
+      - run: git config --global --add safe.directory '*'
+      
       - run: pip install pysigma pysigma-backend-splunk pysigma-pipeline-sysmon
 
       #fa il check tra il commit passato e il presente; Elimina le regole su Splunk se verifica che è stata eliminata una regola nel repo
