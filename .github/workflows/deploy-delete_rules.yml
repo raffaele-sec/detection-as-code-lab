@@ -44,6 +44,10 @@ jobs:
         env: #lo script in python carica le variabili di sistema per url e token di splunk, quindi li carico dai secrets
             SPLUNK_HOST: ${{ secrets.SPLUNK_HOST }}
             SPLUNK_TOKEN: ${{ secrets.SPLUNK_TOKEN }}
+
+      - name: Fix Permissions for Runner Cleanup
+        if: always()
+        run: chown -R 1000:1000 .
             
 
     
