@@ -27,7 +27,7 @@ headers = {
 rules_content_list=[]
 
 try:
-    files_deleted=subprocess.check_output("git diff --name-only --diff-filter=D HEAD^ HEAD", shell=True, text=True).strip()
+    files_deleted=subprocess.check_output("git diff --name-only --diff-filter=D HEAD~1 HEAD", shell=True, text=True).strip()
     if files_deleted:
 
         #lancia il comando "git diff" per vedere i file eliminati, confrontando il commit attuale con quello precedente
