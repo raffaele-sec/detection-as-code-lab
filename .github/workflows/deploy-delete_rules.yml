@@ -11,7 +11,7 @@ jobs:
     runs-on: self-hosted #per fare comunicare github con il server splunk locale
 
     steps:
-      - uses: actions/checkout@v6 #@v6 indica la versione, controllata su https://github.com/marketplace/actions/checkout
+      - uses: actions/checkout@v4 #@v4 indica la versione, controllata su https://github.com/marketplace/actions/checkout
       #serve per caricare i contenuti del mio repo nel runner (quindi le rules e scripts) nel runner
       - run: pip install check-jsonschema
       - run: |
@@ -26,9 +26,19 @@ jobs:
     container: python:3.13-slim
     
     steps:
-      - uses: actions/checkout@v6 #@v6 indica la versione, controllata su https://github.com/marketplace/actions/checkout
+      - uses: actions/checkout@v4 #@v4 indica la versione, controllata su https://github.com/marketplace/actions/checkout
+        with:
+          fetch-depth: 0 #scarica la storia dei commit per permettere il check fatto da SavedSearchDeleter.py
 
+          
       - run: pip install pysigma pysigma-backend-splunk pysigma-pipeline-sysmon
+
+      #fa il check ed elimina regole se verifica che è stata eliminata una regola
+      - run: python scripts/SavedSearchDeleter.py
+        env: #lo script in python carica le variabili di sistema per url e token di splunk, quindi li carico dai secrets
+            SPLUNK_HOST: ${{ secrets.SPLUNK_HOST }}
+            SPLUNK_TOKEN: ${{ secrets.SPLUNK_TOKEN }}
+            
       
       - run: python scripts/Sigma-SPLconverter.py
         env: #lo script in python carica le variabili di sistema per url e token di splunk, quindi li carico dai secrets
