@@ -2,6 +2,7 @@ import os
 import sys
 import urllib3
 import requests
+import urllib
 from sigma.collection import SigmaCollection
 from sigma.backends.splunk import SplunkBackend
 from sigma.pipelines.splunk import splunk_windows_pipeline
@@ -74,7 +75,9 @@ def deploy_rule(name, query, description):
             print(f"La regola {name} è già presente. Verrà eseguito un check per l'update.")
             
             #devo quindi "contattare" l'url con il nome della regola alla fine
-            splunk_url_update=f"{splunk_url}/{name}"
+            splunk_url_update=f"{splunk_url}/{urllib.parse.quote(name)}" ###aggiunta fix per i caratteri speciali nell'url:
+            #grazie a "urllib.parse.quote()" si trasforma il nome della rule in un formato sicuro per il web, per esempio:
+            #"Notepad++ Updater" diventa -> "Notepad%2B%2B%20Updater"
 
             #voglio controllare, prima di effettuare l'update, che le query non siano uguali
             #per avere l'output in formato JSON, per poter accedere al valore della query più facilmente (come un dictionary), metto a fine url il

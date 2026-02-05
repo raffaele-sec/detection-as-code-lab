@@ -2,6 +2,7 @@ import os
 import sys
 import urllib3
 import requests
+import urllib
 from sigma.collection import SigmaCollection
 import subprocess
 import yaml
@@ -77,10 +78,14 @@ try:
         #".rules" permette di iterare tutte le sigma rule presente nell'oggetto "collected_rules"
         #è particolarmente efficace perchè permette di leggere/accedere ogni campo della sigma rule in maniera semplice
 
-        splunk_url=f"{SPLUNK_HOST}/servicesNS/nobody/search/saved/searches/{rules.title}"
+        splunk_url=f"{SPLUNK_HOST}/servicesNS/nobody/search/saved/searches/{urllib.parse.quote(rules.title)}"
         #"rules.title" usa la funzione di pysigma ".title" per accedere al campo "title:" della Sigma rule
         #imposto il path della saved search su splunk con il titolo della regola da eliminare
         #così facendo posso fare la DELETE verso l'api di splunk
+        ###aggiunta fix per i caratteri speciali nell'url:
+            #grazie a "urllib.parse.quote()" si trasforma il nome della rule in un formato sicuro per il web, per esempio:
+            #"Notepad++ Updater" diventa -> "Notepad%2B%2B%20Updater"
+
 
         try:
             req_api=requests.delete(url=splunk_url, headers=headers, verify=False, timeout=10)
