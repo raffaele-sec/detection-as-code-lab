@@ -2,7 +2,8 @@ name: Deploy Splunk Rules
 on:
   push:
     paths:
-      - 'rules/**/**' #gli "**" per indicare indicare la ricorsività
+      - 'rules/**/**' #Il workflow si triggera quando rileva un push nel path indicato
+                      #gli "**" servono per indicare indicare la ricorsività
 
 
 jobs:
@@ -19,10 +20,10 @@ jobs:
           check-jsonschema --schemafile sigma-schema.json rules/**/**/*.yml
       #serve per validare le Sigma rules con sigma-schema.json presente su SigmaHQ
 
-  splunk_deploy: #nome del job
+  splunk_delete_deploy: #nome del job
     needs: sigma_validate #per non fare eseguire il job in parallelo, indico che deve prima terminare con successo il primo
     #ossia la validazione della regola deve terminare con successo:
-    runs-on: self-hosted #per fare comunicare github con il server splunk locale
+    runs-on: self-hosted
     container: python:3.13-slim
     
     steps:
@@ -30,17 +31,14 @@ jobs:
       - run: |
               apt update -y && apt install git -y
               git config --global --add safe.directory '*'
-      #errore "error: Could not access 'HEAD^'" dello script SavedSearchDeleter.py
+      #fix per "error: Could not access 'HEAD^'" dello script SavedSearchDeleter.py
 
       
-      - uses: actions/checkout@v4 #@v4 indica la versione, controllata su https://github.com/marketplace/actions/checkout
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 #scarica la storia dei commit per permettere il check fatto da SavedSearchDeleter.py
+          fetch-depth: 0 #quando fa il checkout,scarica anche la storia dei commit per permettere il check fatto da SavedSearchDeleter.py
 
-      
-      #debugging
-      - run: git log --oneline -n 5
-      
+
       - run: pip install pysigma pysigma-backend-splunk pysigma-pipeline-sysmon
 
       #fa il check tra il commit passato e il presente; Elimina le regole su Splunk se verifica che è stata eliminata una regola nel repo
@@ -51,13 +49,13 @@ jobs:
             
       
       - run: python scripts/Sigma-SPLconverter.py
-        env: #lo script in python carica le variabili di sistema per url e token di splunk, quindi li carico dai secrets
+        env:
             SPLUNK_HOST: ${{ secrets.SPLUNK_HOST }}
             SPLUNK_TOKEN: ${{ secrets.SPLUNK_TOKEN }}
 
       - name: Fix Permissions for Runner Cleanup
         if: always()
         run: chown -R 1000:1000 .
-            
+        #fix per i permessi della directory nel runner locale
 
     
