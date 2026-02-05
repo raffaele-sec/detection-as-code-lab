@@ -21,8 +21,7 @@ SPLUNK_TOKEN = os.environ.get("SPLUNK_TOKEN")
 
 if not SPLUNK_HOST:
     print("URL di Splunk non trovato")
-    #permette a git di terminare il programma con un errore
-    sys.exit(1)
+    sys.exit(1) #permette a git di terminare il programma con un errore
 elif not SPLUNK_TOKEN:
     print("Token di autenticazione Splunk non trovato")
     sys.exit(1)
@@ -38,7 +37,7 @@ def deploy_rule(name, query, description):
     #che la rule diventi visibile a tutti e non solo all'utente di default
     splunk_url=f"{SPLUNK_HOST}/servicesNS/nobody/search/saved/searches"
 
-    #creazione degli header per passare il token, gli esempi sono della documentazione di Splunk
+    #creazione degli header per passare il token di autenticazione per l'API di Splunk, gli esempi sono della documentazione di Splunk
     #sezione "Use authentication tokens"
     headers = {
         "Authorization" : f"Bearer {SPLUNK_TOKEN}"
