@@ -44,7 +44,8 @@ def deploy_rule(name, query, description):
         "Authorization" : f"Bearer {SPLUNK_TOKEN}"
     }
 
-    #preparo il payload, ossia i campi che popoleranno la creazione dell'alert su Splunk.
+    #preparo il payload, ossia i campi che popoleranno la creazione dell'alert su Splunk. NON SERVE, adesso verranno generati report
+    #non serve che venga triggerato l'allarme direttamente dalla SigmaRule-SPL
     payload = {
         # --- PARAMETRI PER CREARE UN REPORT
         "name" : name,
@@ -53,11 +54,11 @@ def deploy_rule(name, query, description):
         "is_scheduled" : "1",
         "cron_schedule" : "*/5 * * * *",
         # --- PARAMETRI PER TRASFORMARLO IN ALLARME
-        "alert_type": "number of events",
-        "alert_comparator": "greater than",
-        "alert_threshold": "0",
-        "alert.track": "1",
-        "alert.severity": "4"
+        #"alert_type": "number of events",
+        #"alert_comparator": "greater than",
+        #"alert_threshold": "0",
+        #"alert.track": "1",
+        #"alert.severity": "4" #con l'aggiunta del RBA, serve che vengano creati report, non allarmi.
         }
     
     #il dizionario contenente i campi per la creazione dell'alert vengono passati a "data"
@@ -103,11 +104,11 @@ def deploy_rule(name, query, description):
                     "description" : description,
                     "is_scheduled" : "1",
                     "cron_schedule" : "*/5 * * * *",
-                    "alert_type": "number of events",
-                    "alert_comparator": "greater than",
-                    "alert_threshold": "0",
-                    "alert.track": "1",
-                    "alert.severity": "4"
+                    #"alert_type": "number of events",
+                    #"alert_comparator": "greater than",
+                    #"alert_threshold": "0",
+                    #"alert.track": "1",
+                    #"alert.severity": "4" #con l'aggiunta del RBA, serve che vengano creati report, non allarmi.
                     }
                     post_update_api = requests.post(url=splunk_url_update, headers=headers, verify=False, data=payload, timeout=10)
                     if post_update_api.status_code == 200:
@@ -124,7 +125,20 @@ def deploy_rule(name, query, description):
     except requests.RequestException as err: #RequestException cattura tutti i tipi di errori, come timeout e connectionerror
         print(err)
         
-        
+
+def score_assign(level): #aggiunta funzione per RBA; assegna uno score in base al level della regola Sigma
+    if level == "low":
+        return 10
+    elif level == "medium":
+        return 25
+    elif level == "high":
+        return 50
+    elif level == "critical":
+        return 100
+    else:
+        print("Errore nell'associazione dello score!")
+        sys.exit(1)
+    
 
 
 rules_path="./rules/"
@@ -153,13 +167,22 @@ except SigmaCollectionError: #gestione errori di collection importata da sigma.e
 for rule in collection_rules.rules:
     rule_name=rule.title
     rule_description=rule.description
+    rule_level=rule.level #aggiunta della lettura del level per implementare RBA
+    rule_score=score_assign(rule_level) #chiamo la funzione per associare il punteggio alla variabile
+
+    add_query=f'| eval risk_score={rule_score}, risk_object=Computer, rule_name="{rule_name}" | collect index=risk' #"singoli apici" per tutta le query e "doppi apici" per {rule_name} perchè non dare errore
+    #parte di query SPL che associa lo score
 
     #converto la singola regola nell'iterazione. backend.convert() accetta la collection, mentre convert_rule() accetta una singola regola.
     try:
-        converted_rule = backend.convert_rule(rule)
+        converted_rule = backend.convert_rule(rule) #converto la regola Sigma in SPL
+        rich_rule=f"{converted_rule[0]} {add_query}" #aggiungo la parte di query che assegna lo score + invio all'indice di Splunk "risk"
+        #perchè "converted_rule[0]"? perchè la funzione backend.convert_rule potrebbe restituire più query da un'unica regola SIGMA, quindi ne teniamo 1.
+
+
+
         #invio i campi estratti regola per regola verso splunk tramite la funziona creata
-        #perchè "converted_rule[0]"? perchè l afunzione backend.convert_rule potrebbe restituire più query da un'unica regola SIGMA, quindi ne teniamo 1.
-        deploy_rule(rule_name, converted_rule[0], rule_description)
+        deploy_rule(rule_name, rich_rule, rule_description)
 
     except SigmaConversionError: #gestione errori di conversione importata da sigma.exceptions
         print(f"Errore di conversione della regola {rule_name}")
