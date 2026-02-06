@@ -178,9 +178,9 @@ for rule in collection_rules.rules:
     #converto la singola regola nell'iterazione. backend.convert() accetta la collection, mentre convert_rule() accetta una singola regola.
     try:
         converted_rule = backend.convert_rule(rule) #converto la regola Sigma in SPL
-        rich_rule=f"{converted_rule[0]} {add_query}" #aggiungo la parte di query che assegna lo score + invio all'indice di Splunk "risk"
+        rich_rule=f"index=wineventlog {converted_rule[0]} {add_query}" #aggiungo la parte di query che assegna lo score + invio all'indice di Splunk "risk"
         #perchè "converted_rule[0]"? perchè la funzione backend.convert_rule potrebbe restituire più query da un'unica regola SIGMA, quindi ne teniamo 1.
-
+        ##fix, aggiunto index=wineventlog perchè la regola sigma generata non ha index
 
 
         #invio i campi estratti regola per regola verso splunk tramite la funziona creata
