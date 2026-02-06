@@ -167,7 +167,9 @@ except SigmaCollectionError: #gestione errori di collection importata da sigma.e
 for rule in collection_rules.rules:
     rule_name=rule.title
     rule_description=rule.description
-    rule_level=rule.level #aggiunta della lettura del level per implementare RBA
+    rule_level=str(rule.level).lower() #aggiunta della lettura del level per implementare RBA
+    #per poter essere confrontata con gli IF nella funzione è necessario che rule_level sia una stringa; il ".rules" restituisce "sigma object"
+ 
     rule_score=score_assign(rule_level) #chiamo la funzione per associare il punteggio alla variabile
 
     add_query=f'| eval risk_score={rule_score}, risk_object=Computer, rule_name="{rule_name}" | collect index=risk' #"singoli apici" per tutta le query e "doppi apici" per {rule_name} perchè non dare errore
