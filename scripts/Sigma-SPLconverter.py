@@ -132,7 +132,7 @@ def deploy_rule(name, query, description):
         print(err)
         
 
-def score_assign(level): #aggiunta funzione per RBA; assegna uno score in base al level della regola Sigma
+def score_assign(level,name): #aggiunta funzione per RBA; assegna uno score in base al level della regola Sigma
     if level == "low":
         return 10
     elif level == "medium":
@@ -142,12 +142,21 @@ def score_assign(level): #aggiunta funzione per RBA; assegna uno score in base a
     elif level == "critical":
         return 100
     else:
-        print("Errore nell'associazione dello score!")
+        print(f"Errore nell'associazione dello score per la regola {name}!")
         sys.exit(1)
     
 
 
 rules_path="./rules/"
+
+sysmon_fields = (
+        "Computer, User, SourceUser, TargetUser, "
+        "Image, SourceImage, ParentImage, TargetImage, "
+        "CommandLine, ParentCommandLine, OriginalFileName, "
+        "TargetFilename, TargetObject, "
+        "SourceIp, DestinationIp, DestinationPort, QueryName, "
+        "EventID, CallTrace, GrantedAccess, Hashes"
+    ) #i campi da passare alla funzione "fields" della query splunk (post conversione)
 
 #importo le regole Sigma dal path "rules" massivamente. SigmaColleciton permette la lettura dei file YAML
 #collection_rules diventa un oggetto che contiene una lista di regola Sigma
@@ -176,9 +185,14 @@ for rule in collection_rules.rules:
     rule_level=str(rule.level).lower() #aggiunta della lettura del level per implementare RBA
     #per poter essere confrontata con gli IF nella funzione è necessario che rule_level sia una stringa; il ".rules" restituisce "sigma object"
  
-    rule_score=score_assign(rule_level) #chiamo la funzione per associare il punteggio alla variabile
+    rule_score=score_assign(rule_level, rule_name) #chiamo la funzione per associare il punteggio alla variabile
 
-    add_query=f'| eval risk_score={rule_score}, risk_object=Computer, rule_name="{rule_name}" | collect index=risk' #"singoli apici" per tutta le query e "doppi apici" per {rule_name} perchè non dare errore
+    add_query=(f'| eval risk_score={rule_score}, risk_object=Computer, rule_name="{rule_name}"'
+               f'| fields + _time, host, risk_score, risk_object, rule_name, {sysmon_fields}' #imposto i campi da passare all'index=risk nella query
+               f'| tojson output_field=_raw' #traduce tutto il log in JSON (perchè è XML)
+               f'| collect index=risk' #invia tutto al nuovo indice creato (dove girerà la logica di RBA identificando i risk score).
+               #tramite il collect verrà convertito il JSON in stash, quindi formato molto leggibile. (XML non lo permette)
+               ) #"singoli apici" per tutta le query e "doppi apici" per {rule_name} perchè non dare errore
     #parte di query SPL che associa lo score
 
     #converto la singola regola nell'iterazione. backend.convert() accetta la collection, mentre convert_rule() accetta una singola regola.
@@ -191,6 +205,7 @@ for rule in collection_rules.rules:
         rich_rule_fixed=rich_rule.replace('source="WinEventLog:Microsoft-Windows-Sysmon/Operational"', 'source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"')
         #fix per la query convertita. processing pipeline di sysmon traduce male la source.
         #l'universal forwarder di splunk invia i dati con source XmlWinEventLog:Microsoft-Windows-Sysmon/Operational; ciò garantisce inoltre i campi parsati correttamente
+
 
         #invio i campi estratti regola per regola verso splunk tramite la funziona creata
         deploy_rule(rule_name, rich_rule_fixed, rule_description)
