@@ -53,6 +53,10 @@ def deploy_rule(name, query, description):
         "description" : description,
         "is_scheduled" : "1",
         "cron_schedule" : "*/5 * * * *",
+        "dispatch.earliest_time": "-5m",
+        "dispatch.latest_time": "now" 
+        #indica che le query avviene è schedulata e avviene ogni 5 minuti, e vede gli eventi avvenuti fino a 5 minuti prima della ricerca
+
         # --- PARAMETRI PER TRASFORMARLO IN ALLARME
         #"alert_type": "number of events",
         #"alert_comparator": "greater than",
@@ -104,6 +108,8 @@ def deploy_rule(name, query, description):
                     "description" : description,
                     "is_scheduled" : "1",
                     "cron_schedule" : "*/5 * * * *",
+                    "dispatch.earliest_time": "-5m",
+                    "dispatch.latest_time": "now" 
                     #"alert_type": "number of events",
                     #"alert_comparator": "greater than",
                     #"alert_threshold": "0",
@@ -182,9 +188,12 @@ for rule in collection_rules.rules:
         #perchè "converted_rule[0]"? perchè la funzione backend.convert_rule potrebbe restituire più query da un'unica regola SIGMA, quindi ne teniamo 1.
         ##fix, aggiunto index=wineventlog perchè la regola sigma generata non ha index
 
+        rich_rule_fixed=rich_rule.replace('source="WinEventLog:Microsoft-Windows-Sysmon/Operational"', 'source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"')
+        #fix per la query convertita. processing pipeline di sysmon traduce male la source.
+        #l'universal forwarder di splunk invia i dati con source XmlWinEventLog:Microsoft-Windows-Sysmon/Operational; ciò garantisce inoltre i campi parsati correttamente
 
         #invio i campi estratti regola per regola verso splunk tramite la funziona creata
-        deploy_rule(rule_name, rich_rule, rule_description)
+        deploy_rule(rule_name, rich_rule_fixed, rule_description)
 
     except SigmaConversionError: #gestione errori di conversione importata da sigma.exceptions
         print(f"Errore di conversione della regola {rule_name}")
