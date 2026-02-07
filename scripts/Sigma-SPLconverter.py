@@ -187,7 +187,7 @@ for rule in collection_rules.rules:
  
     rule_score=score_assign(rule_level, rule_name) #chiamo la funzione per associare il punteggio alla variabile
 
-    add_query=(f'\n| eval risk_score={rule_score}, risk_object=Computer, rule_name="{rule_name}"'
+    add_query=(f'\n| eval risk_score={rule_score}, risk_object=Computer, rule_name="{rule_name}"'#con eval creo i campi su Splunk e gli assegno i valori ricavati dalla Sigma rule
                f'\n| fields + _time, host, risk_score, risk_object, rule_name, {sysmon_fields}' #imposto i campi da passare all'index=risk nella query
                f'\n| tojson output_field=_raw' #traduce tutto il log in JSON (perchè è XML)
                f'\n| collect index=risk' #invia tutto al nuovo indice creato (dove girerà la logica di RBA identificando i risk score).
