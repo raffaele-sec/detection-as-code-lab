@@ -31,6 +31,8 @@ try:
             yaml.safe_dump(techniques_fields, file) #creo il file YAML contenente tutte le technique ID MITRE ATT&CK coperte dalle Sigma rule nel repo
     except:
         print("Errore nella creazione del file 'techniques.yaml'")
+        sys.exit(1)
 
 except SigmaCollectionError:
     print("Errore nel caricamento delle Sigma Rule")
+    sys.exit(1)
