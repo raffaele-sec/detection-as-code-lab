@@ -13,11 +13,7 @@ references:
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2026-02-03
 tags:
-    - attack.collection
-    - attack.credential-access
     - attack.t1195.002
-    - attack.initial-access
-    - attack.t1557
 logsource:
     category: process_creation
     product: windows
