@@ -1,0 +1,22 @@
+name: Deploy Splunk Rules
+on:
+  push:
+    paths:
+      - 'rules/**/**'
+
+jobs:
+  first_job:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git clone https://github.com/rabobank-cdc/DeTTECT.gitcd DeTTECT
+          pip install -r requirements.txt
+          
+      - run: pip install pysigma
+      - run: python scripts/TechniqueExtractor.py
+
+      - run: python dettect.py visibility -f dettect/data_sources.yaml -l
+      - run: python dettect.py detection -f techniques.yaml -l
+      
