@@ -1,0 +1,172 @@
+api_version: 2
+systems:
+  - name: windows-lab-sysmon
+    type: workstation
+    data_sources:
+      # Event ID 1: Process Creation
+      - name: process creation
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 2: File Creation Time (Timestomping)
+      - name: file modification
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 3: Network Connection & Event ID 22: DNS Query
+      - name: network traffic
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 5: Process Terminated
+      - name: process termination
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 6: Driver Loaded
+      - name: driver load
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 7: Image Loaded (DLLs)
+      - name: module load
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 8: CreateRemoteThread & Event ID 10: ProcessAccess
+      - name: process access
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 9: RawAccessRead
+      - name: file access
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 11: FileCreate & Event ID 15: FileStreamHash
+      - name: file creation
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 12, 13, 14: Registry Events (Create, Set, Rename)
+      - name: windows registry
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 17, 18: Pipe Created / Connected
+      - name: named pipe
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 19, 20, 21: WMI Events
+      - name: wmi creation
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 23, 26: File Delete
+      - name: file deletion
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
+
+      # Event ID 25: Process Tampering (Process Hollowing/Herpaderping)
+      - name: process modification
+        date_registered: 2026-02-10
+        products:
+          - Sysmon
+        data_quality:
+          device_completeness: 5
+          data_field_completeness: 5
+          timeliness: 5
+          retention: 5
+          consistency: 5
