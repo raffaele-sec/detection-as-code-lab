@@ -11,7 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          git clone https://github.com/rabobank-cdc/DeTTECT.gitcd DeTTECT
+          git clone https://github.com/rabobank-cdc/DeTTECT.git
+          cd DeTTECT
           pip install -r requirements.txt
           
       - run: pip install pysigma
