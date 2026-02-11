@@ -18,7 +18,7 @@ graph TD
     H -->|Coverage Map| I[MITRE Navigator]
 ```
 
-## 📊 Stato di Avanzamento (Work in Progress)
+## 📊 Stato di Avanzamento
 
 Il progetto è in fase di sviluppo attivo. Di seguito lo stato attuale dei moduli principali:
 
