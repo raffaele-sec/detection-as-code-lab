@@ -1,3 +1,8 @@
+
+
+### ATTUALMENTE LO SCRIPT E' UNA BOZZA! INDICA SOLO CIÒ CHE DOVREBBE FARE! ###
+
+
 import sys
 from sigma.collection import SigmaCollection
 from sigma.exceptions import SigmaCollectionError
