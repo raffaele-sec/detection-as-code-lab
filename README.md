@@ -13,7 +13,7 @@ graph TD
     D[Sigma Rules] -->|Push| E[GitHub Actions]
     E -->|Validation & Parsing| F[Python Scripts]
     F -->|Conversion| G[SPL Queries]
-    F -->|Mapping| H[DeTT&CT Overlay]
+    F -->|Mapping| H[JSON Layer]
     G -->|Deploy API| C
     H -->|Coverage Map| I[MITRE Navigator]
 ```
@@ -27,7 +27,7 @@ Il progetto è in fase di sviluppo attivo. Di seguito lo stato attuale dei modul
 | **Infrastructure** | ![80%](https://geps.dev/progress/80) | Lab locale su Fedora (Docker) + VM Windows (Sysmon/UF) configurati. |
 | **Automation Scripts** | ![70%](https://geps.dev/progress/70) | Script Python per estrazione tag e conversione Sigma parzialmente completi. |
 | **CI/CD Pipeline** | ![60%](https://geps.dev/progress/60) | Workflow GitHub Actions base implementato. |
-| **Coverage Mapping** | ![40%](https://geps.dev/progress/40) | Integrazione DeTT&CT e generazione layer JSON in corso di sviluppo. |
+| **Coverage Mapping** | ![60%](https://geps.dev/progress/40) | Generazione layer JSON completata, integrazione con ATT&CK Navigator in corso. |
 | **Rules Deployment** | ![70%](https://geps.dev/progress/70) | Iniezione automatica su Splunk via REST API in fase di test. |
 
 ## 🛠️ Stack
@@ -35,13 +35,12 @@ Il progetto è in fase di sviluppo attivo. Di seguito lo stato attuale dei modul
 * **SIEM:** Splunk Enterprise
 * **Data Collection:** Sysmon (Olaf Hartong Config) + Splunk Universal Forwarder
 * **Detection Format:** Sigma Rules
-* **Coverage Framework:** DeTT&CT (MITRE ATT&CK Mapping)
+* **Coverage Framework:** MITRE ATT&CK Navigator
 * **Simulation:** Atomic Red Team
 * **CI/CD:** GitHub Actions
 
 ## 📂 Struttura del Repository
 
 * `/rules`: Regole Sigma sorgente.
-* `/scripts`: Tooling Python per il mapping delle Techniques ID (`TechniqueExtractor.py`), per la conversione (`Sigma-SPLconverter.py`) e per l'eliminazione delle query (`SavedSearchDeleter.py`).
-* `/dettect`: Configurazioni per la visibilità e la copertura dei log (`data_sources.yaml`).
+* `/scripts`: Tooling Python per il mapping delle Techniques ID/generazione JSON layer (`TechniqueExtractor.py`), per la conversione (`Sigma-SPLconverter.py`) e per l'eliminazione delle query (`SavedSearchDeleter.py`).
 * `/.github/workflows`: Pipeline di automazione.
