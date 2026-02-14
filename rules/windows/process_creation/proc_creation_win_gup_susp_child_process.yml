@@ -13,7 +13,7 @@ references:
 author: Swachchhanda Shrawan Poudel (Nextron Systems)
 date: 2026-02-03
 tags:
-    - attack.t1195.002
+    - attack.t1195
 logsource:
     category: process_creation
     product: windows

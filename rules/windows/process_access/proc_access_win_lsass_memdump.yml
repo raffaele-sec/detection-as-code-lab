@@ -13,7 +13,7 @@ author: Samir Bousseaden, Michael Haag
 date: 2019-04-03
 modified: 2024-03-02
 tags:
-    - attack.t1003.001
+    - attack.t1003
 logsource:
     category: process_access
     product: windows
