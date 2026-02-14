@@ -44,3 +44,10 @@ Il progetto è in fase di sviluppo attivo. Di seguito lo stato attuale dei modul
 * `/rules`: Regole Sigma sorgente.
 * `/scripts`: Tooling Python per il mapping delle Techniques ID/generazione JSON layer (`TechniqueExtractor.py`), per la conversione (`Sigma-SPLconverter.py`) e per l'eliminazione delle query (`SavedSearchDeleter.py`).
 * `/.github/workflows`: Pipeline di automazione.
+
+
+## 🛡️ Copertura Detection Rule
+
+Clicca il pulsante qui sotto per visualizzare la matrice interattiva sul MITRE ATT&CK Navigator.
+
+[🗺️ **Visualizza Matrice di Copertura**](https://mitre-attack.github.io/attack-navigator/#layerURL=https://raw.githubusercontent.com/raffaele-sec/detection-as-code-lab//main/mitre_navigator_layer.json)
