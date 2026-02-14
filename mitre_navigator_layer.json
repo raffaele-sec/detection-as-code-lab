@@ -1,0 +1,63 @@
+{
+    "name": "Windows Lab - Sigma Coverage (v18)",
+    "versions": {
+        "attack": "18",
+        "navigator": "5.0",
+        "layer": "4.5"
+    },
+    "domain": "enterprise-attack",
+    "description": "Copertura rilevamenti generata automaticamente",
+    "filters": {
+        "platforms": [
+            "Windows"
+        ]
+    },
+    "sorting": 3,
+    "layout": {
+        "layout": "side",
+        "aggregateFunction": "average",
+        "showID": false,
+        "showName": true,
+        "showAggregateScores": false,
+        "countUnscored": false
+    },
+    "hideDisabled": false,
+    "gradient": {
+        "colors": [
+            "#ffffff",
+            "#66ff66"
+        ],
+        "minValue": 0,
+        "maxValue": 1
+    },
+    "techniques": [
+        {
+            "techniqueID": "T1003",
+            "score": 1,
+            "color": "#66ff66",
+            "comment": "Potential Credential Dumping Activity Via LSASS",
+            "enabled": true
+        },
+        {
+            "techniqueID": "T1218",
+            "score": 1,
+            "color": "#66ff66",
+            "comment": "Suspicious CustomShellHost Execution",
+            "enabled": true
+        },
+        {
+            "techniqueID": "T1070",
+            "score": 1,
+            "color": "#66ff66",
+            "comment": "Directory Removal Via Rmdir",
+            "enabled": true
+        },
+        {
+            "techniqueID": "T1195",
+            "score": 1,
+            "color": "#66ff66",
+            "comment": "Suspicious Child Process of Notepad++ Updater - GUP.Exe",
+            "enabled": true
+        }
+    ]
+}
