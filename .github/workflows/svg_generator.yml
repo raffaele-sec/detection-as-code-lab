@@ -14,7 +14,6 @@ jobs:
       - uses: actions/setup-node@v4 #install di Node.js per trasformare il JSON layer+navigator in un'immagine
         with:
           node-version: '20'
-      - run: sudo dnf install -y mesa-libgbm-devel #install delle dipendenze necessarie
           
       - run: pip install pysigma
       - run: python scripts/TechniqueExtractor.py
