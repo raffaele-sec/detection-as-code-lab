@@ -13,13 +13,9 @@ jobs:
 
     steps:      
       - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4 #install di Node.js per trasformare il JSON layer+navigator in un'immagine
-        with:
-          node-version: '20'
-          
+
       - run: pip install pysigma
-      - run: python scripts/TechniqueExtractor.py #genera il JSON layer 
+      - run: python scripts/TechniqueExtractor.py #genera il JSON layer "mitre_navigator_layer.json" nella root dir del repo 
 
       - run: | #si configura l'identità utilizzando il bot di Github
               git config --global user.name 'github-actions[bot]'
