@@ -4,6 +4,9 @@ on:
     paths:
       - 'rules/**/**'
 
+permissions:
+  contents: write
+
 jobs:
   first_job:
     runs-on: self-hosted
