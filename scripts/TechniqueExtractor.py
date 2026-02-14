@@ -80,7 +80,7 @@ try:
     
 
     with open ("mitre_navigator_layer.json", "w") as file:
-        JSONlayer= json.dump(layer_fields, file, indent=4)
+        JSONlayer= json.dump(layer_fields, file, indent=4) #genero infine il JSON layer leggibile
 
 except SigmaCollectionError:
     print("Errore nel caricamento delle Sigma Rule")
