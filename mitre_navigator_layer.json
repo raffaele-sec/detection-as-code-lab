@@ -58,6 +58,13 @@
             "color": "#66ff66",
             "comment": "Suspicious Child Process of Notepad++ Updater - GUP.Exe",
             "enabled": true
+        },
+        {
+            "techniqueID": "T1560.001",
+            "score": 1,
+            "color": "#66ff66",
+            "comment": "Compress Data and Lock With Password for Exfiltration With 7-ZIP",
+            "enabled": true
         }
     ]
 }
