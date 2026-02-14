@@ -27,7 +27,7 @@ Il progetto è in fase di sviluppo attivo. Di seguito lo stato attuale dei modul
 | **Infrastructure** | ![80%](https://geps.dev/progress/80) | Lab locale su Fedora (Docker) + VM Windows (Sysmon/UF) configurati. |
 | **Automation Scripts** | ![70%](https://geps.dev/progress/70) | Script Python per estrazione tag e conversione Sigma parzialmente completi. |
 | **CI/CD Pipeline** | ![60%](https://geps.dev/progress/60) | Workflow GitHub Actions base implementato. |
-| **Coverage Mapping** | ![60%](https://geps.dev/progress/40) | Generazione layer JSON completata, integrazione con ATT&CK Navigator in corso. |
+| **Coverage Mapping** | ![60%](https://geps.dev/progress/60) | Generazione layer JSON completata, integrazione con ATT&CK Navigator in corso. |
 | **Rules Deployment** | ![70%](https://geps.dev/progress/70) | Iniezione automatica su Splunk via REST API in fase di test. |
 
 ## 🛠️ Stack
