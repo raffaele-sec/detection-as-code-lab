@@ -8,7 +8,7 @@ author: Florian Roth (Nextron Systems), Markus Neis, Jonhnathan Ribeiro, Daniil 
 date: 2018-09-03
 modified: 2023-04-06
 tags:
-    - attack.t1059.001
+    - attack.t1059
 logsource:
     category: process_creation
     product: windows

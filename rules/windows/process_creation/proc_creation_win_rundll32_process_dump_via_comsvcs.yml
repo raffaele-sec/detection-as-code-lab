@@ -18,7 +18,7 @@ author: Florian Roth (Nextron Systems), Modexp, Nasreddine Bencherchali (Nextron
 date: 2020-02-18
 modified: 2025-02-23
 tags:
-    - attack.t1003.001
+    - attack.t1003
 logsource:
     category: process_creation
     product: windows
