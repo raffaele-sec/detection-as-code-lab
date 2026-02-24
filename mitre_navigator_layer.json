@@ -32,38 +32,24 @@
     },
     "techniques": [
         {
-            "techniqueID": "T1003",
+            "techniqueID": "T1059.001",
             "score": 1,
             "color": "#66ff66",
-            "comment": "Potential Credential Dumping Activity Via LSASS",
+            "comment": "Suspicious Encoded PowerShell Command Line",
             "enabled": true
         },
         {
-            "techniqueID": "T1218",
+            "techniqueID": "T1003.001",
             "score": 1,
             "color": "#66ff66",
-            "comment": "Suspicious CustomShellHost Execution",
+            "comment": "Process Memory Dump Via Comsvcs.DLL",
             "enabled": true
         },
         {
-            "techniqueID": "T1070",
+            "techniqueID": "T1543.003",
             "score": 1,
             "color": "#66ff66",
-            "comment": "Directory Removal Via Rmdir",
-            "enabled": true
-        },
-        {
-            "techniqueID": "T1195",
-            "score": 1,
-            "color": "#66ff66",
-            "comment": "Suspicious Child Process of Notepad++ Updater - GUP.Exe",
-            "enabled": true
-        },
-        {
-            "techniqueID": "T1560.001",
-            "score": 1,
-            "color": "#66ff66",
-            "comment": "Compress Data and Lock With Password for Exfiltration With 7-ZIP",
+            "comment": "Suspicious New Service Creation",
             "enabled": true
         }
     ]
