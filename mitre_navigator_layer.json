@@ -32,21 +32,21 @@
     },
     "techniques": [
         {
-            "techniqueID": "T1059.001",
+            "techniqueID": "T1059",
             "score": 1,
             "color": "#66ff66",
             "comment": "Suspicious Encoded PowerShell Command Line",
             "enabled": true
         },
         {
-            "techniqueID": "T1003.001",
+            "techniqueID": "T1003",
             "score": 1,
             "color": "#66ff66",
             "comment": "Process Memory Dump Via Comsvcs.DLL",
             "enabled": true
         },
         {
-            "techniqueID": "T1543.003",
+            "techniqueID": "T1543",
             "score": 1,
             "color": "#66ff66",
             "comment": "Suspicious New Service Creation",
