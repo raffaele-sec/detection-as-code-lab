@@ -3,10 +3,25 @@ import sys
 import urllib3
 import requests
 import urllib
+import logging
 from sigma.collection import SigmaCollection
 import subprocess
 import yaml
 from sigma.exceptions import SigmaCollectionError
+
+
+logger = logging.getLogger(__name__) #getLogger è una funzione che crea un logger che si chiama "__name__" (ossia SavedSearchDeleter.py)
+#un logger è un oggetto che registra messaggi. Quindi indica che i log/messaggi che si visualizzano a schermo provengono da "SavedSearchDeleter.py"
+#utile per tracciare i log in eventuali e future integrazioni
+
+
+logging.basicConfig( #Configura i paremetri di cosa e come logga, e come verranno mostrati i messaggi
+    level=logging.INFO,  #mostrerà i log dal livello INFO in su (INFO, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'  # Formato data/ora
+)
+#Al posto di usare print("ERRORE!") utilizzerò logger.error("Errore riscontrato!") per indicare l'errore + la data. (può essere anche logger.info, etc.)
+
 
 
 #per disabilitare warning SSL, perchè la porta 8089 usata per la gestione delle API di splunk 
@@ -20,10 +35,10 @@ SPLUNK_HOST = os.environ.get("SPLUNK_HOST")
 SPLUNK_TOKEN = os.environ.get("SPLUNK_TOKEN")
 
 if not SPLUNK_HOST:
-    print("URL di Splunk non trovato")
+    logger.error("URL di Splunk non trovato")
     sys.exit(1) #permette a git di terminare il programma con un errore
 elif not SPLUNK_TOKEN:
-    print("Token di autenticazione Splunk non trovato")
+    logger.error("Token di autenticazione Splunk non trovato")
     sys.exit(1)
 
 
@@ -60,13 +75,13 @@ try:
                 #e poi si aggiunge la regola convertita in YAML alla lista, creando una LISTA di DIZIONARI
                 #così facendo possiamo usare efficacemente SigmaCollection
     else:
-        print("Nessuna sigma rule eliminata. Non bisogna eliminare nulla su splunk")
+        logger.info("Nessuna sigma rule eliminata. Non bisogna eliminare nulla su splunk")
         sys.exit(0)
         #termina il programma con successo, perchè non rileva nessun elimnazione.
         #così il job del workflow di github termina, ma senza generare errore.
 
 except subprocess.CalledProcessError as e:
-    print(f"Errore {e}")
+    logger.critical(f"Errore esecuzione comandi Git: {e}")
     sys.exit(1)
 
 try:
@@ -90,16 +105,17 @@ try:
         try:
             req_api=requests.delete(url=splunk_url, headers=headers, verify=False, timeout=10)
             if req_api.status_code == 200:
-                print(f"La regola {rules.title} è stata eliminata con successo")
+                logger.info(f"La regola {rules.title} è stata eliminata con successo")
             elif req_api.status_code == 404:
-                print(f"La regola {rules.title} non è presente o è già stata eliminata")
+                logger.info(f"La regola {rules.title} non è presente o è già stata eliminata")
             else:
-                print(f"Errore {req_api.status_code}: {req_api.text}")
+                logger.error(f"Errore {req_api.status_code}: {req_api.text}")
                 sys.exit(1)
 
         except requests.RequestException as err: #RequestException cattura tutti i tipi di errori, come timeout e connectionerror
-            print(err)
+            logger.critical(f"Errore nella DELETE API: {err}")
+            sys.exit(1)
 
 except SigmaCollectionError: #gestione errori di collection importata da sigma.exceptions
-    print("Errore di lettura delle regole da SigmaCollection")
+    logger.critical("Errore di lettura delle regole da SigmaCollection")
     sys.exit(1)

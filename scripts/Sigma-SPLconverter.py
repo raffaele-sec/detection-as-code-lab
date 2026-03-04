@@ -3,11 +3,30 @@ import sys
 import urllib3
 import requests
 import urllib
+import logging
 from sigma.collection import SigmaCollection
 from sigma.backends.splunk import SplunkBackend
 from sigma.pipelines.splunk import splunk_windows_pipeline
 from sigma.pipelines.sysmon import sysmon_pipeline #per mappare gli EventID di sysmon nella query SPL https://github.com/SigmaHQ/pySigma-pipeline-sysmon
 from sigma.exceptions import SigmaCollectionError, SigmaConversionError
+
+
+
+
+logger = logging.getLogger(__name__) #getLogger è una funzione che crea un logger che si chiama "__name__" (ossia Sigma-SPLconverter.py)
+#un logger è un oggetto che registra messaggi. Quindi indica che i log/messaggi che si visualizzano a schermo provengono da "Sigma-SPLconverter.py"
+#utile per tracciare i log in eventuali e future integrazioni
+
+
+logging.basicConfig( #Configura i paremetri di cosa e come logga, e come verranno mostrati i messaggi
+    level=logging.INFO,  #mostrerà i log dal livello INFO in su (INFO, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'  # Formato data/ora
+)
+#Al posto di usare print("ERRORE!") utilizzerò logger.error("Errore riscontrato!") per indicare l'errore + la data. (può essere anche logger.info, etc.)
+
+
+
 
 #per disabilitare warning SSL, perchè la porta 8089 usata per la gestione delle API di splunk 
 #abilita di default HTTPS.
@@ -21,10 +40,10 @@ SPLUNK_HOST = os.environ.get("SPLUNK_HOST")
 SPLUNK_TOKEN = os.environ.get("SPLUNK_TOKEN")
 
 if not SPLUNK_HOST:
-    print("URL di Splunk non trovato")
+    logger.error("URL di Splunk non trovato")
     sys.exit(1) #permette a git di terminare il programma con un errore
 elif not SPLUNK_TOKEN:
-    print("Token di autenticazione Splunk non trovato")
+    logger.error("Token di autenticazione Splunk non trovato")
     sys.exit(1)
 
 
@@ -73,11 +92,11 @@ def deploy_rule(name, query, description):
         
 
         if post_api.status_code == 201:
-            print(f"La regola {name} è stata creata con successo!")
+            logger.info(f"La regola {name} è stata creata con successo!")
 
         #Se restituisce status code 409 vuol dire che la rule c'è già, quindi fa l'update.
         elif post_api.status_code == 409:
-            print(f"La regola {name} è già presente. Verrà eseguito un check per l'update.")
+            logger.info(f"La regola {name} è già presente. Verrà eseguito un check per l'update.")
             
             #devo quindi "contattare" l'url con il nome della regola alla fine
             splunk_url_update=f"{splunk_url}/{urllib.parse.quote(name)}" ###aggiunta fix per i caratteri speciali nell'url:
@@ -98,7 +117,7 @@ def deploy_rule(name, query, description):
                 splunk_query=json_api["entry"][0]["content"]["search"]
 
                 if query == splunk_query:
-                    print("Update della regola non necessario.")
+                    logger.info("Update della regola non necessario.")
                 else:
 
                 
@@ -118,18 +137,18 @@ def deploy_rule(name, query, description):
                     }
                     post_update_api = requests.post(url=splunk_url_update, headers=headers, verify=False, data=payload, timeout=10)
                     if post_update_api.status_code == 200:
-                        print(f"Update della regola {name} effettuato con successo.")
+                        logger.info(f"Update della regola {name} effettuato con successo.")
                     else:
-                        print(f"Errore nell'update della regola {name}.")
+                        logger.warning(f"Errore nell'update della regola {name}.")
                         #rimosso il sys.exit(1) perchè lo script deve continuare convertire/inviare le altre rules, se presenti
             else:
-                print(f"Impossibile leggere la regola {get_api.status_code} : {get_api.text}")
+                logger.warning(f"Impossibile leggere la regola {get_api.status_code} : {get_api.text}")
 
         #else nel caso in cui lo status code della prima POST "post_api" non sia ne 201 ne 409.
         else:
-            print(f"Errore nell'update della regola {name} con errore {post_api.status_code}")
+            logger.warning(f"Errore nell'update della regola {name} con errore {post_api.status_code}")
     except requests.RequestException as err: #RequestException cattura tutti i tipi di errori, come timeout e connectionerror
-        print(err)
+        logger.critical(err)
         
 
 def score_assign(level,name): #aggiunta funzione per RBA; assegna uno score in base al level della regola Sigma
@@ -142,7 +161,7 @@ def score_assign(level,name): #aggiunta funzione per RBA; assegna uno score in b
     elif level == "critical":
         return 100
     else:
-        print(f"Errore nell'associazione dello score per la regola {name}!")
+        logger.error(f"Errore nell'associazione dello score per la regola {name}!")
         sys.exit(1)
     
 
@@ -173,7 +192,7 @@ try:
     #si imposta il backend per la conversione
     backend = SplunkBackend(processing_pipeline=custom_pipeline)
 except SigmaCollectionError: #gestione errori di collection importata da sigma.exceptions
-    print("Errore di lettura delle regole da SigmaCollection")
+    logger.error("Errore di lettura delle regole da SigmaCollection")
     sys.exit(1)
 
 #la proprietà "rules" di SigmaCollection permette di accedere alle singole regole nella collection e ai singoli campi della rule Sigma
@@ -211,7 +230,7 @@ for rule in collection_rules.rules:
         deploy_rule(rule_name, rich_rule_fixed, rule_description)
 
     except SigmaConversionError: #gestione errori di conversione importata da sigma.exceptions
-        print(f"Errore di conversione della regola {rule_name}")
+        logger.warning(f"Errore di conversione della regola {rule_name}")
         continue #continua a iterare e a convertire le altre regole, dopo aver notificato quale regola "non va bene"
         
     

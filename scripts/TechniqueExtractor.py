@@ -4,9 +4,32 @@
 
 
 import sys
+import logging
 from sigma.collection import SigmaCollection
 from sigma.exceptions import SigmaCollectionError
 import json
+
+
+
+
+
+
+
+
+logger = logging.getLogger(__name__) #getLogger è una funzione che crea un logger che si chiama "__name__" (ossia TechniqueExtractor.py)
+#un logger è un oggetto che registra messaggi. Quindi indica che i log/messaggi che si visualizzano a schermo provengono da "TechniqueExtractor.py"
+#utile per tracciare i log in eventuali e future integrazioni
+
+
+logging.basicConfig( #Configura i paremetri di cosa e come logga, e come verranno mostrati i messaggi
+    level=logging.INFO,  #mostrerà i log dal livello INFO in su (INFO, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'  # Formato data/ora
+)
+#Al posto di usare print("ERRORE!") utilizzerò logger.error("Errore riscontrato!") per indicare l'errore + la data. (può essere anche logger.info, etc.)
+
+
+
 
 rules_path="./rules/"
 layer_fields = { #definisco staticamente i campi del layer JSON da passare al MITRE ATT&CK Navigator
@@ -83,5 +106,5 @@ try:
         JSONlayer= json.dump(layer_fields, file, indent=4) #genero infine il JSON layer leggibile
 
 except SigmaCollectionError:
-    print("Errore nel caricamento delle Sigma Rule")
+    logger.critical("Errore nel caricamento delle Sigma Rule")
     sys.exit(1)
